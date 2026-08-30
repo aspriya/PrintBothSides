@@ -8,5 +8,13 @@ export type ImagePlacement = {
   x: number;
   y: number;
   width: number;
+  scale: number;
   rotation: number;
+  tilt: number;
+  cropTop: number;
+  cropRight: number;
+  cropBottom: number;
+  cropLeft: number;
+  flipHorizontal: boolean;
+  flipVertical: boolean;
 };
