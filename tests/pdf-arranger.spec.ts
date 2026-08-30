@@ -14,6 +14,42 @@ if (!frontImage || !backImage) {
 
     await expect(page.getByText("Ashan Priyadarshana - ID Front.jpg")).toBeVisible();
     await expect(page.getByText("Ashan.Priyadarshana - ID Back.jpg")).toBeVisible();
+    await page.getByRole("button", { name: "Select First image" }).click();
+    await page.getByRole("button", { name: "Increase First image size" }).click();
+    await expect(page.getByLabel("Scale").first()).toHaveValue("105");
+    const firstImage = page.getByRole("button", { name: "Select First image" });
+    const imageBounds = await firstImage.boundingBox();
+    if (!imageBounds) throw new Error("First image preview is unavailable.");
+    await page.mouse.move(
+      imageBounds.x + imageBounds.width / 2,
+      imageBounds.y + imageBounds.height / 2,
+    );
+    await page.mouse.down();
+    await page.mouse.move(
+      imageBounds.x + imageBounds.width / 2 + 20,
+      imageBounds.y + imageBounds.height / 2 + 20,
+    );
+    await page.mouse.up();
+    await expect
+      .poll(async () => Number(await page.locator('input[type="number"]').first().inputValue()))
+      .toBeGreaterThan(15);
+
+    const resizeHandle = page.getByRole("button", {
+      name: "Resize First image from bottom right",
+    });
+    await resizeHandle.scrollIntoViewIfNeeded();
+    const handleBounds = await resizeHandle.boundingBox();
+    if (!handleBounds) throw new Error("First image resize handle is unavailable.");
+    expect(
+      await page.evaluate(
+        ({ x, y }) => document.elementFromPoint(x, y)?.getAttribute("aria-label"),
+        {
+          x: handleBounds.x + handleBounds.width / 2,
+          y: handleBounds.y + handleBounds.height / 2,
+        },
+      ),
+    ).toBe("Resize First image from bottom right");
+    await expect(resizeHandle).toBeVisible();
     await page.screenshot({
       path: "test-results/supplied-id-images-original.png",
       fullPage: true,
@@ -33,6 +69,18 @@ if (!frontImage || !backImage) {
     await expect(
       page.getByRole("button", { name: "Mirror horizontal" }).first(),
     ).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("button", { name: "Rotate right 90 degrees" }).first().click();
+    await expect(page.locator('input[type="number"]').nth(3)).toHaveValue("90");
+    await expect
+      .poll(async () => {
+        const bounds = await firstImage.boundingBox();
+        return bounds ? bounds.width > bounds.height : false;
+      })
+      .toBe(true);
+    await page.getByRole("button", { name: "Collapse First image" }).click();
+    await expect(
+      page.getByRole("button", { name: "Expand First image" }),
+    ).toHaveAttribute("aria-expanded", "false");
     await page.screenshot({
       path: "test-results/supplied-id-images-edited.png",
       fullPage: true,
@@ -40,6 +88,8 @@ if (!frontImage || !backImage) {
 
     const download = page.waitForEvent("download");
     await page.getByRole("button", { name: "Download PDF" }).click();
-    expect((await download).suggestedFilename()).toBe("print-both-sides.pdf");
+    const downloadedPdf = await download;
+    expect(downloadedPdf.suggestedFilename()).toBe("print-both-sides.pdf");
+    await downloadedPdf.saveAs("test-results/print-both-sides.pdf");
   });
 }
