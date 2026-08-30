@@ -10,7 +10,7 @@ Install dependencies and start the development server:
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). Choose two images, adjust their position, width, and rotation, then download the generated PDF.
+Open [http://localhost:3000](http://localhost:3000). Choose two images, adjust each image's placement, scale, rotation, horizontal tilt, crop edges, and mirror state, then download the generated PDF. Edits are non-destructive and remain only in the current browser session.
 
 ## Static deployment
 
@@ -27,4 +27,14 @@ This writes a fully static site to the `out/` directory. Upload the contents of 
 ```bash
 npm run lint
 npm run build
+```
+
+## Browser test with local images
+
+The end-to-end test intentionally reads image paths from environment variables so personal images are never committed. It verifies local selection, crop, scale, tilt, mirroring, and the PDF download flow while saving an edited-page screenshot to `test-results/`.
+
+```bash
+PRINT_BOTH_SIDES_FRONT="/absolute/path/to/front.jpg" \
+PRINT_BOTH_SIDES_BACK="/absolute/path/to/back.jpg" \
+npm run test:e2e
 ```
