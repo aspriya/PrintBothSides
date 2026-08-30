@@ -8,7 +8,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run dev -- --port 3100",
+    command: "npx http-server out -p 3100 -c-1",
     url: "http://127.0.0.1:3100",
     reuseExistingServer: false,
   },
